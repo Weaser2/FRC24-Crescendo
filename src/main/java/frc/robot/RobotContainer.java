@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ClimberConstants.ClimberDirection;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.shooter.Blower;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -74,6 +75,7 @@ public class RobotContainer {
   CommandXboxController m_driverController = new CommandXboxController(IOConstants.kDriverControllerPort);
   XboxController m_driverControllerSP = new XboxController(IOConstants.kDriverControllerPort);
   CommandXboxController m_operatorController = new CommandXboxController(IOConstants.kOperatorControllerPort);
+  private final Blower m_blower = new Blower();
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -194,6 +196,8 @@ public class RobotContainer {
 
     m_driverController.a().whileTrue(m_feeder.shootNote());
 
+    m_driverController.x().whileTrue(Commands.run(() -> m_blower.blow()));
+
 
     /**
      * CLIMBING controls
@@ -205,7 +209,8 @@ public class RobotContainer {
     m_driverController.povUp().whileTrue(m_pivot.pivotToRest());
     m_driverController.povDown().whileTrue(m_climber.climbDown());
 
-      }
+    m_blower.setUpButtonBinding(m_driverController);
+  }
 
   private void configureOperatorBindings() {
     /*
@@ -261,7 +266,7 @@ public class RobotContainer {
      return autonomousChooser.getSelected();
 
     /* Shoot and back up */
-    // return new SequentialCommandGroup(m_pivot.pivotToSpeaker().withTimeout(2.5).alongWith(Commands.runOnce(() -> 
+    // return new SequentialCommandGroup(m_pivot.pivotToSpeaker().withTimeout(2.5).alongWith(Commands.runOnce(()-> 
     //   m_shooter.toggleState(ShooterState.SPEAKER))).andThen(new WaitCommand(0.9)).andThen(m_feeder.shootNote().withTimeout(1.0)).andThen(Commands.runOnce(()-> m_shooter.toggleState(ShooterState.IDLE))).andThen(Commands.run(()-> m_robotDrive.drive(-1,0, 0, false), m_robotDrive).alongWith(m_intake.intake()).withTimeout(1.0)));
     //return new PathPlannerAuto("test");
   }
